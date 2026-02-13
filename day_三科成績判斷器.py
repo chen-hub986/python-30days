@@ -12,6 +12,6 @@ elif Average>=60 and Average<90:
   print("成績及格")
 else:  print("成績不及格")
 
-if (A or B or C) < 40:
+if A < 40 or B < 40 or C < 40:
   print("有單科過低，需特別注意")
 
