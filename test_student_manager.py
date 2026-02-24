@@ -1,4 +1,5 @@
-from student_manager_v6 import StudentManager, Student
+from scr.manager import StudentManager
+from scr.student import Student
 import pytest
 
 
