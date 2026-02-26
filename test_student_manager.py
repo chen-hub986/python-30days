@@ -23,6 +23,14 @@ def test_add_student_invalid_scores(tmp_path, students_manager):
     with pytest.raises(InvalidScoreException):
         students_manager.add_student("Bob", [90, -5, 85])  # Invalid score
 
+def test_add_student_non_numeric_scores(tmp_path, students_manager):
+    with pytest.raises(InvalidScoreException):
+        students_manager.add_student("Charlie", [90, "A", 85])  # Non-numeric score
+
+def test_add_student_empty_scores(tmp_path, students_manager):
+    with pytest.raises(InvalidScoreException):
+        students_manager.add_student("David", []) # Empty scores list
+
 def test_add_duplicate_student(tmp_path, students_manager):
     with pytest.raises(DuplicateStudentException):
         students_manager.add_student("Alice", [80, 85, 90])

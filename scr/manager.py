@@ -24,13 +24,24 @@ class StudentManager:
     def save_students(self) -> None:
         with open(self.data_file, 'w', encoding='utf-8') as file:
             json.dump([student.to_dict() for student in self.students], file, ensure_ascii=False, indent=4)
-    
-    def add_student(self, name: str, scores: List[float]) -> Student:
-         if any(student.name == name for student in self.students):
-             raise DuplicateStudentException(f"學生 {name} 已存在，無法重複添加。")
-         
-         if any(score < 0 or score > 100 for score in scores):
+
+    def _validate_scores(self, scores: List[float]) -> None:
+        if not all(isinstance(score, (int, float)) for score in scores):
+             raise InvalidScoreException("成績無效，請確保所有成績都是數字。")
+        
+        if not scores:
+            raise InvalidScoreException("成績列表不能為空。")
+
+        if any(score < 0 or score > 100 for score in scores):
              raise InvalidScoreException("成績無效，請確保成績在 0 到 100 之間。")
+        
+    def _validate_name(self, name: str) -> None:
+        if any(student.name == name for student in self.students):
+            raise DuplicateStudentException(f"學生 {name} 已存在，無法重複添加。")
+
+    def add_student(self, name: str, scores: List[float]) -> Student:
+         self._validate_name(name)
+         self._validate_scores(scores)
 
          student = Student(name, scores)
          self.students.append(student)
@@ -49,8 +60,7 @@ class StudentManager:
             raise StudentNotFoundException(f"學生 {name} 不存在，無法刪除。")
 
     def modify_student(self, name: str, scores: List[float]) -> Optional[Student]:
-        if any(score < 0 or score > 100 for score in scores):
-            raise InvalidScoreException("成績無效，請確保成績在 0 到 100 之間。")
+        self._validate_scores(scores)
         
         for student in self.students:
             if student.name == name:

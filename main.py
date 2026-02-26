@@ -26,19 +26,18 @@ def main():
                 if name.lower() == 'q':
                     break
                 
-                score = input("請輸入學生的成績（用逗號分隔）：")
                 try: 
+                    score = input("請輸入學生的成績（用逗號分隔）：")
                     scores = [float(s.strip()) for s in score.split(',')]
                     students_manager.add_student(name, scores)
-                    print(f"已添加學生 {name} 的資料，平均成績為 {students_manager.students[-1].average_score():.2f}")     
+                    print(f"已添加學生 {name} 的資料，平均成績為 {students_manager.students[-1].average_score():.2f}")
                 except ValueError:
-                    print("請輸入有效的成績！")
+                    print("成績輸入無效，請確保成績是數字並用逗號分隔。")
                 except DuplicateStudentException as e:
                     print(e)
                 except InvalidScoreException as e:
                     print(e)
         
-
         elif choice == '2':
             if not students_manager.students: 
                 print("沒有學生資料。")
@@ -106,7 +105,7 @@ def main():
                 else:
                     print(f"未找到學生 {name} 的資料。")
             except ValueError:
-                print("請輸入有效的成績！")
+                print("成績輸入無效，請確保成績是數字並用逗號分隔。")
             except InvalidScoreException as e:
                 print(e)
             except StudentNotFoundException as e:
