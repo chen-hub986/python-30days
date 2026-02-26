@@ -1,7 +1,10 @@
 from scr.student import Student
+from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
 from typing import List, Optional
+
 import json
 import os
+
 
 class StudentManager:
     def __init__(self, data_file='students.json'):
@@ -23,27 +26,38 @@ class StudentManager:
             json.dump([student.to_dict() for student in self.students], file, ensure_ascii=False, indent=4)
     
     def add_student(self, name: str, scores: List[float]) -> Student:
+         if any(student.name == name for student in self.students):
+             raise DuplicateStudentException(f"學生 {name} 已存在，無法重複添加。")
+         
+         if any(score < 0 or score > 100 for score in scores):
+             raise InvalidScoreException("成績無效，請確保成績在 0 到 100 之間。")
+
          student = Student(name, scores)
          self.students.append(student)
          self.save_students()
          return student
 
-    def delete_student(self, name: str) -> bool:
+    def delete_student(self, name: str) -> None:
         original_students = self.students.copy()
         self.students = [student for student in self.students if student.name != name]
         
         deleted = len(self.students) < len(original_students)
         if deleted:
             self.save_students()
-        return deleted  # 返回是否成功刪除學生
+            return
+        else:
+            raise StudentNotFoundException(f"學生 {name} 不存在，無法刪除。")
 
     def modify_student(self, name: str, scores: List[float]) -> Optional[Student]:
+        if any(score < 0 or score > 100 for score in scores):
+            raise InvalidScoreException("成績無效，請確保成績在 0 到 100 之間。")
+        
         for student in self.students:
             if student.name == name:
                 student.scores = scores
                 self.save_students()
                 return student  # 返回修改後的學生資料
-        return None  # 沒有找到學生
+        raise StudentNotFoundException(f"學生 {name} 不存在，無法修改。")
 
     def get_avg_score(self) -> dict:
         if not self.students:
@@ -55,6 +69,7 @@ class StudentManager:
                 "min_student": None,
                 "min_average_score": 0
             }
+        
         averages = [student.average_score() for student in self.students]
         overall_average = sum(averages) / len(averages)
 

@@ -1,12 +1,13 @@
 from scr.manager import StudentManager
 from scr.student import Student
+from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+
 import pytest
 
 
 @pytest.fixture
 def students_manager():
     return StudentManager()
-
 
 def test_average_empty_scores(tmp_path):
     student = Student(name="Empty", scores=[])
@@ -18,11 +19,23 @@ def test_add_student(tmp_path, students_manager):
     assert student.scores == [90, 95, 85]
     assert student.average_score() == 90.0
 
+def test_add_student_invalid_scores(tmp_path, students_manager):
+    with pytest.raises(InvalidScoreException):
+        students_manager.add_student("Bob", [90, -5, 85])  # Invalid score
+
+def test_add_duplicate_student(tmp_path, students_manager):
+    with pytest.raises(DuplicateStudentException):
+        students_manager.add_student("Alice", [80, 85, 90])
+
 def test_delete_student(tmp_path, students_manager):
     students_manager.add_student("Bob", [80, 85, 90])
-    deleted = students_manager.delete_student("Bob")
-    assert deleted == True
+    students_manager.delete_student("Bob")
+    assert None == next((student for student in students_manager.students if student.name == "Bob"), None)
     assert all(student.name != "Bob" for student in students_manager.students)
+
+def test_delete_student_not_found(tmp_path, students_manager):
+    with pytest.raises(StudentNotFoundException):
+        students_manager.delete_student("NonExistentStudent")
 
 def test_modify_student(tmp_path, students_manager):
     students_manager.add_student("Charlie", [70, 75, 80])

@@ -1,4 +1,6 @@
 from scr.manager import StudentManager
+from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+
 
 def main():
     students_manager = StudentManager()
@@ -16,7 +18,7 @@ def main():
         if choice == '1':
             while True:
                 name = input("請輸入學生姓名（或輸入 'q' 結束）：")
-                
+
                 if not name.strip():
                     print("請輸入學生姓名!")
                     continue
@@ -28,9 +30,14 @@ def main():
                 try: 
                     scores = [float(s.strip()) for s in score.split(',')]
                     students_manager.add_student(name, scores)
-                    print(f"已添加學生 {name} 的資料，平均成績為 {students_manager.students[-1].average_score():.2f}")
+                    print(f"已添加學生 {name} 的資料，平均成績為 {students_manager.students[-1].average_score():.2f}")     
                 except ValueError:
                     print("請輸入有效的成績！")
+                except DuplicateStudentException as e:
+                    print(e)
+                except InvalidScoreException as e:
+                    print(e)
+        
 
         elif choice == '2':
             if not students_manager.students: 
@@ -70,13 +77,13 @@ def main():
                 print("請輸入學生姓名!")
                 continue
             
-            if not any(student.name == name for student in students_manager.students):
-                print(f"未找到學生 {name} 的資料。")
-                continue
-            
             print(f"正在刪除學生 {name} 的資料...")
-            if students_manager.delete_student(name):
+            try:
+                students_manager.delete_student(name)
                 print(f"已刪除學生 {name} 的資料。")
+            except StudentNotFoundException as e:
+                print(e)
+
         
         elif choice == '6':
             if not students_manager.students:
@@ -87,10 +94,6 @@ def main():
 
             if not name.strip():
                 print("請輸入學生姓名!")
-                continue
-
-            if not any(student.name == name for student in students_manager.students):
-                print(f"未找到學生 {name} 的資料。")
                 continue
 
             score = input("請輸入新的成績（用逗號分隔）：")
@@ -104,6 +107,10 @@ def main():
                     print(f"未找到學生 {name} 的資料。")
             except ValueError:
                 print("請輸入有效的成績！")
+            except InvalidScoreException as e:
+                print(e)
+            except StudentNotFoundException as e:
+                print(e)
         
         elif choice == '7':
             print("退出程式。")
