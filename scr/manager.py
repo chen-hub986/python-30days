@@ -1,29 +1,16 @@
 from scr.student import Student
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
 from typing import List, Optional
-
-import json
-import os
+from scr.repository import StudentRepository
 
 
 class StudentManager:
-    def __init__(self, data_file='students.json'):
-        self.data_file = data_file
-        self.students = self.load_students()
-
-    def load_students(self) -> List[Student]:
-        if os.path.exists(self.data_file):
-            try:
-                with open(self.data_file, 'r', encoding='utf-8') as file:
-                    data = json.load(file)
-                    return [Student.from_dict(student) for student in data]
-            except (json.JSONDecodeError, KeyError):
-                print(f"無法讀取學生資料檔案 {self.data_file}，請確保檔案格式正確。")
-        return []
+    def __init__(self, repository: Optional[StudentRepository] = None, data_file='students.json'):
+        self.repository = repository if repository is not None else StudentRepository(data_file)
+        self.students = self.repository.load_students()
 
     def save_students(self) -> None:
-        with open(self.data_file, 'w', encoding='utf-8') as file:
-            json.dump([student.to_dict() for student in self.students], file, ensure_ascii=False, indent=4)
+        self.repository.save_students(self.students)
 
     def _validate_scores(self, scores: List[float]) -> None:
         if not all(isinstance(score, (int, float)) for score in scores):

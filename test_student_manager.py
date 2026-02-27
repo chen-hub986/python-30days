@@ -1,13 +1,15 @@
 from scr.manager import StudentManager
 from scr.student import Student
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+from scr.repository import StudentRepository
 
 import pytest
 
 
 @pytest.fixture
 def students_manager():
-    return StudentManager()
+    repo = StudentRepository(data_file="students.json")
+    return StudentManager(repository=repo)
 
 def test_average_empty_scores(tmp_path):
     student = Student(name="Empty", scores=[])
