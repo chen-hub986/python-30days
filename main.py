@@ -1,9 +1,11 @@
 from scr.manager import StudentManager
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+from scr.repository import StudentRepository
 
 
 def main():
-    students_manager = StudentManager()
+    students_repository = StudentRepository('students.json')
+    students_manager = StudentManager(students_repository)
     while True:
         print("\n選擇操作：")
         print("1. 添加學生資料")

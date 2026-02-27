@@ -3,9 +3,10 @@ import os
 
 from scr.student import Student
 from typing import List
+from scr.base_repository import BaseRepository
 
 
-class StudentRepository:
+class StudentRepository(BaseRepository):
     def __init__(self, data_file='students.json' ) -> None:
         self.data_file = data_file
         self.students = self.load_students()

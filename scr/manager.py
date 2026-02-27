@@ -1,12 +1,12 @@
 from scr.student import Student
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
 from typing import List, Optional
-from scr.repository import StudentRepository
+from scr.base_repository import BaseRepository
 
 
 class StudentManager:
-    def __init__(self, repository: Optional[StudentRepository] = None, data_file='students.json'):
-        self.repository = repository if repository is not None else StudentRepository(data_file)
+    def __init__(self, repository: BaseRepository, data_file='students.json'):
+        self.repository = repository
         self.students = self.repository.load_students()
 
     def save_students(self) -> None:
