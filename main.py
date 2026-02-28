@@ -1,9 +1,11 @@
 from scr.manager import StudentManager
-from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException, emptyStudentListException
 from scr.repository import StudentRepository
+from scr.logger import Logger
 
 
 def main():
+    Logger().log_info("學生管理系統啟動")
     students_repository = StudentRepository('students.json')
     students_manager = StudentManager(students_repository)
     while True:
@@ -34,6 +36,7 @@ def main():
                     students_manager.add_student(name, scores)
                     print(f"已添加學生 {name} 的資料，平均成績為 {students_manager.students[-1].average_score():.2f}")
                 except ValueError:
+                    Logger().log_error("成績輸入無效，請確保成績是數字並用逗號分隔。")
                     print("成績輸入無效，請確保成績是數字並用逗號分隔。")
                 except DuplicateStudentException as e:
                     print(e)
@@ -41,65 +44,74 @@ def main():
                     print(e)
         
         elif choice == '2':
-            if not students_manager.students: 
-                print("沒有學生資料。")
-                continue
-            
-            print("\n學生資料列表:")
-            for student in students_manager.students:
-                print(f"{student.name} - 平均成績: {student.average_score():.2f}")
+            try:
+                students_manager._validate_empty_student_list()
+                print("\n學生資料列表:")
+                for student in students_manager.students:
+                    print(f"{student.name} - 平均成績: {student.average_score():.2f}")
+            except emptyStudentListException as e:
+                print(e)
+                continue            
 
         elif choice == '3':
-            if not students_manager.students:
-                print("沒有學生資料。")
+            try:
+                students_manager._validate_empty_student_list()
+                avg_info = students_manager.get_avg_score()
+                print(f"\n各個學生平均成績:{', '.join(f'{name}: {avg:.2f}' for name, avg in avg_info['student_averages'])}")
+                print(f"\n所有學生的平均成績為: {avg_info['overall_average']:.2f}")
+                print(f"\n最高平均成績的學生是: {avg_info['max_student']}，成績為 {avg_info['max_average_score']:.2f}")
+                print(f"\n最低平均成績的學生是: {avg_info['min_student']}，成績為 {avg_info['min_average_score']:.2f}")
+            except emptyStudentListException as e:
+                print(e)
                 continue
-            avg_info = students_manager.get_avg_score()
-            print(f"\n各個學生平均成績:{', '.join(f'{name}: {avg:.2f}' for name, avg in avg_info['student_averages'])}")
-            print(f"\n所有學生的平均成績為: {avg_info['overall_average']:.2f}")
-            print(f"\n最高平均成績的學生是: {avg_info['max_student']}，成績為 {avg_info['max_average_score']:.2f}")
-            print(f"\n最低平均成績的學生是: {avg_info['min_student']}，成績為 {avg_info['min_average_score']:.2f}")
-        
+
         elif choice == '4':
-            if not students_manager.students:
-                print("沒有學生資料。")
+            try:
+                students_manager._validate_empty_student_list()
+                ranking = students_manager.get_ranking()
+                print("\n成績排名:")
+                for rank, student in enumerate(ranking, 1):
+                    print(f"{rank}. {student.name} - 平均成績: {student.average_score():.2f}")
+            except emptyStudentListException as e:
+                print(e)
                 continue
-            print("\n成績排名:")
-            for rank, student in enumerate(students_manager.get_ranking(), 1):
-             print(f"{rank}. {student.name} - 平均成績: {student.average_score():.2f}")
 
         elif choice == '5':
-            if not students_manager.students:
-                print("沒有學生資料。")
-                continue
-            print(f"學生資料列表: {[student.name for student in students_manager.students]}")
-            name = input("請輸入要刪除的學生姓名：")
-            
-            if not name.strip():
-                print("請輸入學生姓名!")
-                continue
-            
-            print(f"正在刪除學生 {name} 的資料...")
             try:
+                students_manager._validate_empty_student_list()
+
+                print(f"學生資料列表: {[student.name for student in students_manager.students]}")   
+                name = input("請輸入要刪除的學生姓名：")
+            
+                if not name.strip():
+                    print("請輸入學生姓名!")
+                    continue
+
+                print(f"正在刪除學生 {name} 的資料...")
+                
                 students_manager.delete_student(name)
                 print(f"已刪除學生 {name} 的資料。")
             except StudentNotFoundException as e:
                 print(e)
+            except emptyStudentListException as e:
+                print(e)
+                continue
 
         
         elif choice == '6':
-            if not students_manager.students:
-                print("沒有學生資料。")
-                continue
-            print(f"學生資料列表: {[student.name for student in students_manager.students]}")
-            name = input("請輸入要修改的學生姓名：")
-
-            if not name.strip():
-                print("請輸入學生姓名!")
-                continue
-
-            score = input("請輸入新的成績（用逗號分隔）：")
-            print(f"正在修改學生 {name} 的資料...")
             try:
+                students_manager._validate_empty_student_list()
+
+                print(f"學生資料列表: {[student.name for student in students_manager.students]}")
+                name = input("請輸入要修改的學生姓名：")
+
+                if not name.strip():
+                    print("請輸入學生姓名!")
+                    continue
+
+                score = input("請輸入新的成績（用逗號分隔）：")
+                print(f"正在修改學生 {name} 的資料...")
+
                 scores = [float(s.strip()) for s in score.split(',')]
                 update_result = students_manager.modify_student(name, scores)
                 if update_result:
@@ -112,9 +124,13 @@ def main():
                 print(e)
             except StudentNotFoundException as e:
                 print(e)
+            except emptyStudentListException as e:
+                print(e)
+                continue
         
         elif choice == '7':
             print("退出程式。")
+            Logger().log_info("學生管理系統關閉")
             break
         else:
             print("無效的選項，請重新輸入！")

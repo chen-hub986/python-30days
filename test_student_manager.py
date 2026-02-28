@@ -1,12 +1,12 @@
 from scr.manager import StudentManager
 from scr.student import Student
-from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException
+from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException, emptyStudentListException
 from scr.base_repository import BaseRepository
 
 import pytest
 
 
-class inmemory_repository(BaseRepository):
+class InMemoryRepository(BaseRepository):
     def __init__(self):
         self.students = []
 
@@ -18,7 +18,7 @@ class inmemory_repository(BaseRepository):
 
 @pytest.fixture
 def students_manager():
-    repo = inmemory_repository()
+    repo = InMemoryRepository()
     return StudentManager(repository=repo)
 
 def test_average_empty_scores():
@@ -43,7 +43,7 @@ def test_add_student_empty_scores(students_manager):
     with pytest.raises(InvalidScoreException):
         students_manager.add_student("David", []) # Empty scores list
 
-def test_add_duplicate_student(tmp_path, students_manager):
+def test_add_duplicate_student(students_manager):
         students_manager.add_student("Alice", [90, 95, 85])
         with pytest.raises(DuplicateStudentException):
             students_manager.add_student("Alice", [80, 85, 90])
@@ -55,6 +55,7 @@ def test_delete_student(students_manager):
     assert all(student.name != "Bob" for student in students_manager.students)
 
 def test_delete_student_not_found(students_manager):
+    students_manager.add_student("Alice", [90, 95, 85])
     with pytest.raises(StudentNotFoundException):
         students_manager.delete_student("NonExistentStudent")
 
@@ -82,3 +83,7 @@ def test_get_ranking(students_manager):
     assert ranking[0].name == "Alice"
     assert ranking[1].name == "Charlie"
     assert ranking[2].name == "David"
+
+def test_get_ranking_empty(students_manager):
+    with pytest.raises(emptyStudentListException):
+        students_manager.get_ranking()

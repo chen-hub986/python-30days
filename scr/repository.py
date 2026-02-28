@@ -4,6 +4,7 @@ import os
 from scr.student import Student
 from typing import List
 from scr.base_repository import BaseRepository
+from scr.logger import Logger
 
 
 class StudentRepository(BaseRepository):
@@ -18,7 +19,7 @@ class StudentRepository(BaseRepository):
                     data = json.load(file)
                     return [Student.from_dict(student) for student in data]
             except (json.JSONDecodeError, KeyError):
-                print(f"無法讀取學生資料檔案 {self.data_file}，請確保檔案格式正確。")
+                Logger().log_error(f"讀取學生資料檔案 {self.data_file} 時發生錯誤。")
         return []
 
     def save_students(self , students_list) -> None:
