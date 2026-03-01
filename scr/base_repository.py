@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List
 from scr.student import Student
+
 
 class BaseRepository(ABC):
     @abstractmethod
