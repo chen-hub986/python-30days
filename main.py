@@ -25,7 +25,7 @@ def show_students(students_manager):
     students_manager._validate_empty_student_list()
     print("\n學生資料列表:")
     for student in students_manager.students:
-        print(f"{student.name} - 平均成績: {student.average_score():.2f}")
+        print(f"{student.name} - 平均成績: {student.average_score:.2f}")
 
 
 @MenuErrorHandler
@@ -44,7 +44,7 @@ def show_ranking(students_manager):
     print("\n成績排名:")
 
     for rank, student in enumerate(ranking, 1):
-        print(f"{rank}. {student.name} - 平均成績: {student.average_score():.2f}")
+        print(f"{rank}. {student.name} - 平均成績: {student.average_score:.2f}")
 
 @MenuErrorHandler
 def delete_student(students_manager):

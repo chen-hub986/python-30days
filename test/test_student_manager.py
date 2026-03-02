@@ -22,14 +22,15 @@ def students_manager():
     return StudentManager(repository=repo)
 
 def test_average_empty_scores():
-    student = Student(name="Empty", scores=[])
-    assert student.average_score() == 0.0
+    with pytest.raises(InvalidScoreException):
+        student = Student(name="Empty", scores=[])
+    
 
 def test_add_student(students_manager):
     student = students_manager.add_student("Alice", [90, 95, 85])
     assert student.name == "Alice"
     assert student.scores == [90, 95, 85]
-    assert student.average_score() == 90.0
+    assert student.average_score == 90.0
 
 def test_add_student_invalid_scores(students_manager):
     with pytest.raises(InvalidScoreException):
@@ -64,7 +65,7 @@ def test_modify_student(students_manager):
     modified_student = students_manager.modify_student("Charlie", [85, 90, 95])
     assert modified_student is not None
     assert modified_student.scores == [85, 90, 95]
-    assert modified_student.average_score() == 90.0
+    assert modified_student.average_score == 90.0
 
 def test_get_avg_score(students_manager):    
     students_manager.add_student("David", [60, 65, 70])
