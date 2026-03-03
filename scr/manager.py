@@ -1,14 +1,15 @@
 from scr.student import Student
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException,  emptyStudentListException
-from typing import List, Optional
+from typing import List, Optional, Callable
 from scr.base_repository import BaseRepository
 from scr.logger import Logger
 
 
 class StudentManager:
-    def __init__(self, repository: BaseRepository):
+    def __init__(self, repository: BaseRepository, logger: Logger):
         self.repository = repository
         self.students = self.repository.load_students()
+        self.logger = logger
 
     def save_students(self) -> None:
         self.repository.save_students(self.students)
@@ -27,6 +28,10 @@ class StudentManager:
         if not self.students:
             raise emptyStudentListException("沒有學生資料，無法進行操作。")
         
+    def get_students(self):
+        self._validate_empty_student_list()
+        return self.students
+        
     def add_student(self, name: str, scores: List[float]) -> Student:
          self._validate_name(name)
 
@@ -35,7 +40,7 @@ class StudentManager:
 
          self.save_students()
 
-         Logger().log_info(f"成功添加學生 {name} 的資料，平均成績為 {student.average_score:.2f}")
+         self.logger.log_info(f"成功添加學生 {name} 的資料，平均成績為 {student.average_score:.2f}")
 
          return student
 
@@ -47,7 +52,7 @@ class StudentManager:
         self.students.remove(student_to_deleted)
         
         self.save_students()
-        Logger().log_info(f"成功刪除學生 {name}")
+        self.logger.log_info(f"成功刪除學生 {name}")
         return
 
     def modify_student(self, name: str, scores: List[float]) -> Optional[Student]:
@@ -57,7 +62,7 @@ class StudentManager:
         student.scores = scores
 
         self.save_students()
-        Logger().log_info(f"成功修改學生 {name} 的資料，平均成績為 {student.average_score:.2f}")
+        self.logger.log_info(f"成功修改學生 {name} 的資料，平均成績為 {student.average_score:.2f}")
         return student  # 返回修改後的學生資料
 
     def get_avg_score(self) -> dict:
@@ -84,3 +89,12 @@ class StudentManager:
         self._validate_empty_student_list()
         sorted_students = sorted(self.students, key=lambda student: student.average_score, reverse=True)
         return sorted_students
+    
+    def search_student_by_name(self, query: str) -> List[Student]:
+        query = query.lower()
+        return [student for student in self.students 
+                if query in student.name.lower()
+            ]
+    
+    def filter_student(self, criteria: Callable[[Student], bool]) ->List[Student]:
+        return list(filter(criteria, self.students))

@@ -22,7 +22,7 @@ def student_add(students_manager):
     
 @MenuErrorHandler
 def show_students(students_manager):
-    students_manager._validate_empty_student_list()
+    students_manager.get_students()
     print("\n學生資料列表:")
     for student in students_manager.students:
         print(f"{student.name} - 平均成績: {student.average_score:.2f}")
@@ -30,7 +30,7 @@ def show_students(students_manager):
 
 @MenuErrorHandler
 def show_avg_score(students_manager):
-    students_manager._validate_empty_student_list()
+    students_manager.get_students()
     avg_info = students_manager.get_avg_score()
     print(f"\n各個學生平均成績:{', '.join(f'{name}: {avg:.2f}' for name, avg in avg_info['student_averages'])}")
     print(f"\n所有學生的平均成績為: {avg_info['overall_average']:.2f}")
@@ -39,7 +39,7 @@ def show_avg_score(students_manager):
 
 @MenuErrorHandler
 def show_ranking(students_manager):
-    students_manager._validate_empty_student_list()
+    students_manager.get_students()
     ranking = students_manager.get_ranking()
     print("\n成績排名:")
 
@@ -48,7 +48,7 @@ def show_ranking(students_manager):
 
 @MenuErrorHandler
 def delete_student(students_manager):
-    students_manager._validate_empty_student_list()
+    students_manager.get_students()
 
     print(f"學生資料列表: {[student.name for student in students_manager.students]}")   
     name = input("請輸入要刪除的學生姓名：")
@@ -65,7 +65,7 @@ def delete_student(students_manager):
 
 @MenuErrorHandler
 def modify_student(students_manager):
-    students_manager._validate_empty_student_list()
+    students_manager.get_students()
 
     print(f"學生資料列表: {[student.name for student in students_manager.students]}")
     name = input("請輸入要修改的學生姓名：")
@@ -83,12 +83,69 @@ def modify_student(students_manager):
     update_result = students_manager.modify_student(name, scores)
     if update_result:
         return
+    
+@MenuErrorHandler
+def search_students(students_manager):
+    students_manager.get_students()
 
+    name = input("請輸入學生姓名關鍵字:")
+
+    if not name.strip():
+        print("請輸入學生姓名!")
+        return
+
+    search_result = students_manager.search_student_by_name(name)
+    
+    if not search_result:
+        print(f"找不到包含{name}關鍵字的學生。")
+        return
+    else:
+        print(f"找到了{len(search_result)}筆結果:")
+        print("-" * 30)
+        for s in search_result:
+            print(f"姓名:{s.name} | 平均成績:{s.average_score:.2f}")
+            print("-" * 30)
+
+@MenuErrorHandler
+def show_top_students(students_manager):
+    students_manager.get_students()
+
+    print("尋找優等生 (平均成績 > 80)...")
+
+    top_students = students_manager.filter_student(lambda s: s.average_score >= 80)
+
+    if not top_students:
+        print("沒有結果。")
+        return
+    else:
+        for s in top_students:
+            print("-" * 30)
+            print(f"姓名:{s.name} | 平均成績:{s.average_score:.2f}")
+            print("-" * 30)
+
+@MenuErrorHandler
+def search_filter_menu(students_manager):
+    while True:
+        print("\n請選擇:")
+        print("1. 搜尋學生")
+        print("2. 列出優等生")
+        print("3. 返回")
+        choice = input("請輸入選項（1-3）：")
+
+        if choice == '1':
+            search_students(students_manager)
+        elif choice == '2':
+            show_top_students(students_manager)
+        elif choice == '3':
+            break
+        else:
+            print("無效的選項，請重新輸入！")
 
 def main():
     Logger().log_info("學生管理系統啟動")
     students_repository = StudentRepository('students.json')
-    students_manager = StudentManager(students_repository)
+    logger = Logger()
+    students_manager = StudentManager(students_repository, logger)
     while True:
         print("\n選擇操作：")
         print("1. 添加學生資料")
@@ -97,8 +154,9 @@ def main():
         print("4. 顯示成績排名")
         print("5. 刪除學生資料")
         print("6. 修改學生資料")
-        print("7. 退出程式")
-        choice = input("請輸入選項（1-7）：")
+        print("7. 列出優等生或搜尋學生")
+        print("8. 退出程式")
+        choice = input("請輸入選項（1-8）：")
         
         if choice == '1':
             student_add(students_manager)
@@ -113,6 +171,8 @@ def main():
         elif choice == '6':
             modify_student(students_manager)
         elif choice == '7':
+            search_filter_menu(students_manager)
+        elif choice == '8':
             print("退出程式。")
             Logger().log_info("學生管理系統關閉")
             break
@@ -121,4 +181,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        

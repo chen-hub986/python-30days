@@ -2,6 +2,7 @@ from scr.manager import StudentManager
 from scr.student import Student
 from scr.exceptions import StudentNotFoundException, DuplicateStudentException, InvalidScoreException, emptyStudentListException
 from scr.base_repository import BaseRepository
+from scr.logger import Logger
 
 import pytest
 
@@ -19,7 +20,8 @@ class InMemoryRepository(BaseRepository):
 @pytest.fixture
 def students_manager():
     repo = InMemoryRepository()
-    return StudentManager(repository=repo)
+    logger = Logger()
+    return StudentManager(repository=repo, logger=logger)
 
 def test_average_empty_scores():
     with pytest.raises(InvalidScoreException):

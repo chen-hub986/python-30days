@@ -13,7 +13,7 @@ htmlcov/
 
 # === 日誌與資料庫 ===
 *.log
-
+students.json
 # === 編輯器設定 (IDE) ===
 .vscode/
 .idea/
