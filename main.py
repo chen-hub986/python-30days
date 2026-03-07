@@ -4,6 +4,28 @@ from scr.logger import Logger
 from scr.decorators import MenuErrorHandler
 
 
+def display_welcome_logo():
+    # 使用 ANSI Escape Codes 加上綠色 (\033[92m)
+    # 記得使用 r""" """ 原生字串，避免反斜線被誤認
+    GREEN = "\033[92m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    
+    logo = r"""
+      :::::::: ::::::::::: :::    ::: :::::::::  :::::::::: ::::    ::: ::::::::::: 
+    :+:    :+:    :+:     :+:    :+: :+:    :+: :+:        :+:+:   :+:     :+:      
+   +:+           +:+     +:+    +:+ +:+    +:+ +:+        :+:+:+  +:+     +:+       
+  +#++:++#++    +#+     +#+    +:+ +#+    +:+ +#++:++#   +#+ +:+ +#+     +#+        
+        +#+    +#+     +#+    +#+ +#+    +#+ +#+        +#+  +#+#+#     +#+         
+#+#    #+#    #+#     #+#    #+# #+#    #+# #+#        #+#   #+#+#     #+#          
+########     ###      ########  #########  ########## ###    ####     ###           
+    /_/  INTELLIGENT SYSTEM
+    """
+    print(f"{GREEN}{BOLD}{logo}{RESET}")
+    print(f"{GREEN}  >>> Student Management System Initialized{RESET}")
+    print(f"{GREEN}  >>> Powered by Chen a High School Student.{RESET}\n")
+
+
 @MenuErrorHandler
 def student_add(students_manager):
     while True:
@@ -246,4 +268,5 @@ def main():
             print("無效的選項，請重新輸入！")
 
 if __name__ == "__main__":
+    display_welcome_logo()
     main()

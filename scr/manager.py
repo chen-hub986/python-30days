@@ -40,7 +40,7 @@ class StudentManager:
 
          self.save_students()
 
-         self.logger.log_info(f"成功添加學生 {name} 的資料，平均成績為 {student.average_score:.2f}")
+         self.logger.log_info(f"成功添加學生 {name} 的資料")
 
          return student
 
